@@ -46,13 +46,11 @@ try:
 except ImportError:
     from urlparse import parse_qs
 
-from . import version
-
 
 BASE_URL = "https://graph.facebook.com"
 
 
-__version__ = version.__version__
+__version__ = "1.1.0-alpha"
 
 
 class GraphAPI(object):
