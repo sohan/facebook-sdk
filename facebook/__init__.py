@@ -50,7 +50,7 @@ except ImportError:
 BASE_URL = "https://graph.facebook.com"
 
 
-__version__ = "1.1.0-alpha"
+__version__ = "1.1.1-alpha"
 
 
 class GraphAPI(object):
@@ -354,6 +354,7 @@ class GraphAPIError(Exception):
             # OAuth 2.0 Draft 00
             try:
                 self.message = result["error"]["message"]
+                self.type = result["error"]["code"]
             except:
                 # REST server style
                 try:
