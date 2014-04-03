@@ -50,7 +50,7 @@ except ImportError:
 BASE_URL = "https://graph.facebook.com"
 
 
-__version__ = "1.1.2-alpha"
+__version__ = "1.1.3-alpha"
 
 
 class GraphAPI(object):
@@ -193,33 +193,30 @@ class GraphAPI(object):
                      method="POST")
 
     def _handle_response(self, status_code, headers, body, url=None):
-        if status_code >= 400:
-            try:
-                result = json.loads(body)
-                raise GraphAPIError(result)
-            except ValueError:
-                raise GraphAPIError("Received status_code %s but body was not JSON" % status_code)
-        if 'json' in headers.get('content-type', ''):
+        result = None
+        try:
+            # Attempt to retrieve JSON by default
             result = json.loads(body)
-        elif 'image/' in headers.get('content-type', ''):
-            mimetype = headers['content-type']
-            result = {"data": body,
-                      "mime-type": mimetype,
-                      "url": url}
-        elif "access_token" in parse_qs(body):
-            query_str = parse_qs(body)
-            if "access_token" in query_str:
-                result = {"access_token": query_str["access_token"][0]}
-                if "expires" in query_str:
-                    result["expires"] = query_str["expires"][0]
+        except ValueError:
+            if 'image/' in headers.get('content-type', ''):
+                mimetype = headers['content-type']
+                result = {"data": body,
+                          "mime-type": mimetype,
+                          "url": url}
+            elif "access_token" in parse_qs(body):
+                query_str = parse_qs(body)
+                if "access_token" in query_str:
+                    result = {"access_token": query_str["access_token"][0]}
+                    if "expires" in query_str:
+                        result["expires"] = query_str["expires"][0]
+                else:
+                    raise GraphAPIError(json.loads(body))
             else:
-                raise GraphAPIError(json.loads(body))
-        else:
-            # Unknown content type, trying JSON
-            try:
-                result = json.loads(body)
-            except ValueError:
-                raise GraphAPIError('Maintype was not text, image, or querystring')
+                raise GraphAPIError('Body was not JSON, image, or querystring')
+        if status_code >= 400:
+            if result:
+                raise GraphAPIError(result)
+            raise GraphAPIError("Received status_code %s but body type could not be determined" % status_code)
         if result and isinstance(result, dict) and result.get("error"):
             raise GraphAPIError(result)
         return result
