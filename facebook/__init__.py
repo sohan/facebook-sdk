@@ -194,8 +194,11 @@ class GraphAPI(object):
 
     def _handle_response(self, status_code, headers, body, url=None):
         if status_code >= 400:
-            result = json.loads(body)
-            raise GraphAPIError(result)
+            try:
+                result = json.loads(body)
+                raise GraphAPIError(result)
+            except ValueError:
+                raise GraphAPIError("Received status_code %s but body was not JSON" % status_code)
         if 'json' in headers.get('content-type', ''):
             result = json.loads(body)
         elif 'image/' in headers.get('content-type', ''):
