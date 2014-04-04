@@ -370,7 +370,7 @@ class GraphAPIError(Exception):
         Exception.__init__(self, self.message)
 
 
-def get_user_from_cookie(cookies, app_id, app_secret):
+def get_user_from_cookie(cookies, app_id, app_secret, call_facebook=True):
     """Parses the cookie set by the official Facebook JavaScript SDK.
 
     cookies should be a dictionary-like object mapping cookie names to
@@ -394,11 +394,14 @@ def get_user_from_cookie(cookies, app_id, app_secret):
     parsed_request = parse_signed_request(cookie, app_secret)
     if not parsed_request:
         return None
-    try:
-        result = get_access_token_from_code(parsed_request["code"], "",
-                                            app_id, app_secret)
-    except GraphAPIError:
-        return None
+    if call_facebook:
+        try:
+            result = get_access_token_from_code(parsed_request["code"], "",
+                                                app_id, app_secret)
+        except GraphAPIError:
+            return None
+    else:
+        result = {}
     result["uid"] = parsed_request["user_id"]
     return result
 
