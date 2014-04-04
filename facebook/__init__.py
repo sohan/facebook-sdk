@@ -50,7 +50,7 @@ except ImportError:
 BASE_URL = "https://graph.facebook.com"
 
 
-__version__ = "1.1.4-alpha"
+__version__ = "1.1.5-alpha"
 
 
 class GraphAPI(object):
