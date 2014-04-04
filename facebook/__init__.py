@@ -50,7 +50,7 @@ except ImportError:
 BASE_URL = "https://graph.facebook.com"
 
 
-__version__ = "1.1.3-alpha"
+__version__ = "1.1.4-alpha"
 
 
 class GraphAPI(object):
@@ -273,8 +273,13 @@ class GraphAPI(object):
                                            timeout=self.timeout)
             batch_response.raise_for_status()
         except requests.HTTPError as e:
-            batch_response = json.loads(e.read())
-            raise GraphAPIError(batch_response)
+            if e.response:
+                try:
+                    batch_response = e.response.json()
+                    raise GraphAPIError(batch_response)
+                except:
+                    pass
+            raise GraphAPIError(e)
         responses = []
         for response in batch_response.json():
             try:
