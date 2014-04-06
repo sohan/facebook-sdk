@@ -300,8 +300,12 @@ class GraphAPI(object):
 
         Example query: "SELECT affiliations FROM user WHERE uid = me()"
 
+        `query` can also be a dict of {key: query_string}
+
         """
-        self.request("fql", {"q": query})
+        if not isinstance(query, dict):
+            query = {"q": query}
+        return self.request("fql", query)
 
     def get_app_access_token(self, app_id, app_secret):
         """Get the application's access token as a string."""
