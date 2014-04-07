@@ -300,6 +300,8 @@ class GraphAPI(object):
 
         Example query: "SELECT affiliations FROM user WHERE uid = me()"
 
+        `query` can also be a dict of {key: query_string}
+
         """
         return self.request("fql", {"q": query})
 
